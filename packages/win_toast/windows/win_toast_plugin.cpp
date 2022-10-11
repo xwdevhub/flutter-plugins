@@ -31,6 +31,7 @@ class Toast {
       int type, std::string title,
       std::string subtitle,
       std::string image,
+      int silent,
       std::vector<std::string> actions) : toastTemplate_(WinToastTemplate::WinToastTemplateType(type)) {
     toastTemplate_.setFirstLine(string2wString(title));
     if (subtitle.size() != 0) {
@@ -39,6 +40,11 @@ class Toast {
     if (image.size() != 0) {
       toastTemplate_.setImagePath(string2wString(image));
     }
+     if(silent==0){
+       toastTemplate_.setAudioOption(WinToastTemplate::AudioOption::Silent);
+     }else{
+      toastTemplate_.setAudioOption(WinToastTemplate::AudioOption::Default);
+     }
     for (auto action: actions) {
       toastTemplate_.addAction(string2wString(action));
     }
@@ -188,12 +194,13 @@ void WinToastPlugin::HandleMethodCall(
     auto subtitle = std::get<std::string>(arguments->at(flutter::EncodableValue("subtitle")));
     auto imagePath = std::get<std::string>(arguments->at(flutter::EncodableValue("imagePath")));
     auto type = std::get<int>(arguments->at(flutter::EncodableValue("type")));
+     auto silent = std::get<int>(arguments->at(flutter::EncodableValue("silent")));
     auto actions = std::get<flutter::EncodableList>(arguments->at(flutter::EncodableValue("actions")));
     std::vector<std::string> action_strs;
     for (auto const &action: actions) {
       action_strs.push_back(std::get<std::string>(action));
     }
-    auto toast = std::make_shared<Toast>(type, title, subtitle, imagePath, std::move(action_strs));
+    auto toast = std::make_shared<Toast>(type, title, subtitle, imagePath,silent, std::move(action_strs));
 
     auto handler = std::make_unique<ToastServiceHandler>(
         toast,

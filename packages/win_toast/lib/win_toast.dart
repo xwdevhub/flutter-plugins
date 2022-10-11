@@ -161,6 +161,7 @@ class WinToast {
     required String title,
     String subtitle = '',
     String imagePath = '',
+    bool silent = false,
     List<String> actions = const <String>[],
   }) async {
     if (!_supportToast) {
@@ -174,6 +175,7 @@ class WinToast {
       'subtitle': subtitle,
       'imagePath': imagePath,
       'actions': actions,
+      'silent': silent ? 0 : 1,
     });
     debugPrint('id: $id');
     if (id == -1 || id == null) {
