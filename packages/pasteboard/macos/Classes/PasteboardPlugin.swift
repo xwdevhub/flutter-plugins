@@ -12,6 +12,12 @@ public class PasteboardPlugin: NSObject, FlutterPlugin {
     switch call.method {
     case "image":
       image(result: result)
+    case "writeImage":
+      if let data = call.arguments as? FlutterStandardTypedData {
+        writeImageToPasteboard(data.data, result: result)
+      } else {
+        result(FlutterError(code: "0", message: "arguments is not data", details: nil))
+      }
     case "files":
       files(result: result)
     case "writeFiles":
@@ -31,6 +37,12 @@ public class PasteboardPlugin: NSObject, FlutterPlugin {
       return
     }
     result(image.png)
+  }
+
+  private func writeImageToPasteboard(_ data: Data, result: FlutterResult) {
+    NSPasteboard.general.clearContents()
+    NSPasteboard.general.setData(data, forType: NSPasteboard.PasteboardType.png)
+    result(nil)
   }
 
   private func files(result: FlutterResult) {
