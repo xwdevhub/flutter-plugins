@@ -31,13 +31,18 @@ public class PasteboardPlugin: NSObject, FlutterPlugin {
     }
   }
 
-  private func image(result: FlutterResult) {
-    guard let image = NSPasteboard.general.readObjects(forClasses: [NSImage.self], options: nil)?.first as? NSImage else {
-      result(nil)
-      return
+    private func image(result: FlutterResult) {
+        guard let fileUrl = NSPasteboard.general.readObjects(forClasses: [NSURL.self], options: nil)?.first as? NSURL else {
+            guard let image = NSPasteboard.general.readObjects(forClasses: [NSImage.self], options: nil)?.first as? NSImage else {
+                result(nil)
+                return
+            }
+            result(image.png)
+            return
+        }
+        let urlImage = NSImage(contentsOf: fileUrl as URL)
+        result(urlImage?.png)
     }
-    result(image.png)
-  }
 
   private func writeImageToPasteboard(_ data: Data, result: FlutterResult) {
     NSPasteboard.general.clearContents()
