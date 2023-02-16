@@ -54,11 +54,15 @@ public class PasteboardPlugin: NSObject, FlutterPlugin {
     var resultFiles: [String] = []
 
     urlList.forEach { url in
-      if let path = (url as? NSURL)?.path {
-        resultFiles.append(path)
-      }
+        if let path = (url as? NSURL)?.path {
+            if let absoluteString = (url as? NSURL)?.absoluteString {
+                if absoluteString.hasPrefix("https://") == false && absoluteString.hasPrefix("http://") == false {
+                    resultFiles.append(path)
+                }
+            }
+        }
     }
-    result(resultFiles)
+    result(resultFiles.count > 0 ? resultFiles : nil)
   }
 
   private func writeFiles(_ files: [String], result: FlutterResult) {
