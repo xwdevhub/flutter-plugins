@@ -620,7 +620,7 @@ namespace
 			string str = std::string(data1.data(), data1.data() + data1.size());
 			std::cout << str << std::endl;
 			wchar_t *wc = new wchar_t[str.size()];
-			swprintf(wc, 100, L"%S", str.c_str());
+			swprintf(wc, 1000, L"%S", str.c_str());
 
 			Gdiplus::Bitmap *image1 = Gdiplus::Bitmap::FromFile(wc);
 			Gdiplus::Bitmap &image = *image1;
