@@ -32,6 +32,15 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
+  Uint8List encode(String s) {
+    var encodedString = utf8.encode(s);
+    var encodedLength = encodedString.length;
+    var data = ByteData(encodedLength);
+    var bytes = data.buffer.asUint8List();
+    bytes.setRange(0, encodedLength, encodedString);
+    return bytes;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -79,8 +88,14 @@ class _MyAppState extends State<MyApp> {
               ),
               TextButton(
                 onPressed: () {
-                  final data = base64Decode(_kImageBase64);
-                  Pasteboard.writeImage(data);
+                  if (Platform.isWindows) {
+                    String path = "D:\\swc.png";
+                    Uint8List data1 = encode(path);
+                    Pasteboard.writeImage(data1);
+                  } else {
+                    final data = base64Decode(_kImageBase64);
+                    Pasteboard.writeImage(data);
+                  }
                 },
                 child: const Text("Write Image"),
               ),
