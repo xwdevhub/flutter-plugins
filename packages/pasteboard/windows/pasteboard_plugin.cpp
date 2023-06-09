@@ -79,7 +79,6 @@ namespace
 			CloseClipboard();
 			DWORD erroe = GetLastError();
 			cout << erroe << endl;
-			// cout << "失败了" << endl;
 			// return PASTE_PASTE_ERROR;
 			return 1;
 		}
@@ -298,6 +297,25 @@ namespace
 		hdr->biYPelsPerMeter = 1;
 		hdr->biClrUsed = 0;
 		hdr->biClrImportant = 0;
+	}
+
+	std::wstring stringToWstring(const std::string &str)
+	{
+		LPCSTR pszSrc = str.c_str();
+		int nLen = MultiByteToWideChar(CP_ACP, 0, pszSrc, -1, NULL, 0);
+		if (nLen == 0)
+			return std::wstring(L"");
+
+		wchar_t *pwszDst = new wchar_t[nLen];
+		if (!pwszDst)
+			return std::wstring(L"");
+
+		MultiByteToWideChar(CP_ACP, 0, pszSrc, -1, pwszDst, nLen);
+		std::wstring wstr(pwszDst);
+		delete[] pwszDst;
+		pwszDst = NULL;
+
+		return wstr;
 	}
 
 	HBITMAP CreateHBitmapXRGB8888(int width, int height, HANDLE shared_section,
@@ -619,10 +637,8 @@ namespace
 
 			string str = std::string(data1.data(), data1.data() + data1.size());
 			std::cout << str << std::endl;
-			wchar_t *wc = new wchar_t[str.size()];
-			swprintf(wc, 1000, L"%S", str.c_str());
-
-			Gdiplus::Bitmap *image1 = Gdiplus::Bitmap::FromFile(wc);
+			wstring ss = stringToWstring(str);
+			Gdiplus::Bitmap *image1 = Gdiplus::Bitmap::FromFile(ss.c_str());
 			Gdiplus::Bitmap &image = *image1;
 			HBITMAP hbitmap;
 			if (image1 == NULL)
