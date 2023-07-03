@@ -582,7 +582,7 @@ namespace
 				result->Error("0", "failed to open clipboard");
 				return;
 			}
-
+            EmptyClipboard();
 			auto storage = CreateStorageForFileNames(paths);
 			if (storage.tymed == TYMED_NULL)
 			{
