@@ -39,4 +39,6 @@ class Pasteboard {
   /// Available on all platforms.
   /// Set text to system pasteboard.
   static void writeText(String value) => pasteboard.writeText(value);
+
+  static Future<bool> save2png(String value) => pasteboard.save2png(value);
 }

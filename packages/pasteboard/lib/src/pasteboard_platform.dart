@@ -14,4 +14,6 @@ abstract class PasteboardPlatform {
   Future<String?> get text;
 
   void writeText(String value);
+
+  Future<bool> save2png(String path);
 }

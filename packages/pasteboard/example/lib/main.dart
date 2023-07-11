@@ -60,8 +60,19 @@ class _MyAppState extends State<MyApp> {
                 children: [
                   TextButton(
                     onPressed: () async {
-                      final lines =
-                          const LineSplitter().convert(textController.text);
+                      int begin = DateTime.now().millisecondsSinceEpoch;
+                      const path = "D:\\新建文件夹\\swc1.png";
+                      await Pasteboard.save2png(path);
+                      int end = DateTime.now().millisecondsSinceEpoch;
+                      print(end - begin);
+                    },
+                    child: const Text('save2png'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      // final lines =
+                      //     const LineSplitter().convert(textController.text);
+                      final lines = ["D:\\swc.jpg"];
                       await Pasteboard.writeFiles(lines);
                     },
                     child: const Text('copy as files'),

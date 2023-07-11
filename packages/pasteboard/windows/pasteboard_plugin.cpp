@@ -16,6 +16,7 @@
 #include <cstring>
 #include <iterator>
 #include <GdiPlus.h>
+#include "include/FreeImage.h"
 #pragma comment(lib, "gdiplus.lib")
 
 using namespace Gdiplus;
@@ -299,19 +300,21 @@ namespace
 		hdr->biClrImportant = 0;
 	}
 
-	string Utf8ToGbk(const char* src_str)
+	string Utf8ToGbk(const char *src_str)
 	{
 		int len = MultiByteToWideChar(CP_UTF8, 0, src_str, -1, NULL, 0);
-		wchar_t* wszGBK = new wchar_t[len + 1];
+		wchar_t *wszGBK = new wchar_t[len + 1];
 		memset(wszGBK, 0, len * 2 + 2);
 		MultiByteToWideChar(CP_UTF8, 0, src_str, -1, wszGBK, len);
 		len = WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, NULL, 0, NULL, NULL);
-		char* szGBK = new char[len + 1];
+		char *szGBK = new char[len + 1];
 		memset(szGBK, 0, len + 1);
 		WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, szGBK, len, NULL, NULL);
 		string strTemp(szGBK);
-		if (wszGBK) delete[] wszGBK;
-		if (szGBK) delete[] szGBK;
+		if (wszGBK)
+			delete[] wszGBK;
+		if (szGBK)
+			delete[] szGBK;
 		return strTemp;
 	}
 
@@ -348,6 +351,39 @@ namespace
 			CreateDIBSection(nullptr, reinterpret_cast<const BITMAPINFO *>(&hdr), 0,
 							 data, shared_section, 0);
 		return hbitmap;
+	}
+
+	// 从剪贴板中获取图片保存在指定的未知
+	bool save2png(std::string filePath)
+	{
+		HDC hdc = CreateDCA("DISPLAY", NULL, NULL, NULL); // 为屏幕创建设备描述表
+		if (!OpenClipboard(nullptr))
+		{
+			std::cout << "cannot open clipboard" << std::endl;
+			return false;
+		}
+
+		HBITMAP hBitmap = nullptr;
+		if (IsClipboardFormatAvailable(CF_BITMAP))
+		{
+			hBitmap = static_cast<HBITMAP>(GetClipboardData(CF_BITMAP));
+		}
+		if (hBitmap != nullptr)
+		{
+			BITMAP bm_info;
+			GetObject(hBitmap, sizeof(BITMAP), (LPSTR)&bm_info);
+			FIBITMAP *dib_new = FreeImage_Allocate(bm_info.bmWidth, bm_info.bmHeight, 24);
+			GetDIBits(hdc, hBitmap, 0, FreeImage_GetHeight(dib_new),
+					  FreeImage_GetBits(dib_new), FreeImage_GetInfo(dib_new), DIB_RGB_COLORS);
+			int nColors = FreeImage_GetColorsUsed(dib_new);
+			FreeImage_GetInfoHeader(dib_new)->biClrUsed = nColors;
+			FreeImage_GetInfoHeader(dib_new)->biClrImportant = nColors;
+			FreeImage_Save(FIF_PNG, dib_new, filePath.c_str());
+			FreeImage_Unload(dib_new);
+			DeleteObject(hBitmap);
+		}
+		CloseClipboard();
+		return true;
 	}
 
 	// A scoper to manage acquiring and automatically releasing the clipboard.
@@ -582,7 +618,7 @@ namespace
 				result->Error("0", "failed to open clipboard");
 				return;
 			}
-            EmptyClipboard();
+			EmptyClipboard();
 			auto storage = CreateStorageForFileNames(paths);
 			if (storage.tymed == TYMED_NULL)
 			{
@@ -652,7 +688,7 @@ namespace
 			}
 
 			string str = std::string(data1.data(), data1.data() + data1.size());
-			str=Utf8ToGbk(str.c_str());
+			str = Utf8ToGbk(str.c_str());
 			std::cout << str << std::endl;
 			wstring ss = stringToWstring(str);
 			Gdiplus::Bitmap *image1 = Gdiplus::Bitmap::FromFile(ss.c_str());
@@ -688,6 +724,26 @@ namespace
 
 			// copyBitmapToClipboard(data1, data1.size());
 			result->Success();
+		}
+		else if (method_call.method_name() == "save2png")
+		{
+			auto arguments = method_call.arguments();
+			std::string filePath;
+			if (std::holds_alternative<std::string>(*arguments))
+			{
+				filePath = std::get<std::string>(*arguments);
+				filePath = Utf8ToGbk(filePath.c_str());
+			}
+			bool res = false;
+			try
+			{
+				res = save2png(filePath);
+			}
+			catch (exception e)
+			{
+				res = false;
+			}
+			result->Success(flutter::EncodableValue(res));
 		}
 		else
 		{

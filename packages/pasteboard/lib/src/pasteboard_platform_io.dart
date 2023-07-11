@@ -76,4 +76,15 @@ class PasteboardPlatformIO implements PasteboardPlatform {
   void writeText(String value) {
     Clipboard.setData(ClipboardData(text: value));
   }
+
+  @override
+  Future<bool> save2png(String path) async {
+    try {
+      final result = await _channel.invokeMethod<bool>('save2png', path);
+      return result!;
+    } catch (error, stacktrace) {
+      debugPrint('$error\n$stacktrace');
+      return false;
+    }
+  }
 }
