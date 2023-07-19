@@ -15,18 +15,18 @@
 #include <algorithm>
 #include <cstring>
 #include <iterator>
-#include <GdiPlus.h>
+// #include <GdiPlus.h>
 #include "include/FreeImage.h"
-#pragma comment(lib, "gdiplus.lib")
+// #pragma comment(lib, "gdiplus.lib")
 
-using namespace Gdiplus;
+// using namespace Gdiplus;
 using namespace std;
 
 namespace
 {
 
-	GdiplusStartupInput m_Gdistart;
-	ULONG_PTR m_GdiplusToken;
+// 	GdiplusStartupInput m_Gdistart;
+// 	ULONG_PTR m_GdiplusToken;
 	using flutter::EncodableList;
 	using flutter::EncodableMap;
 	using flutter::EncodableValue;
@@ -670,59 +670,59 @@ namespace
 		}
 		else if (method_call.method_name() == "writeImage")
 		{
-			auto arguments = method_call.arguments();
-			//  getArgumentString(arguments,"");
-
-			std::cout << arguments << std::endl;
-			string data;
-			std::vector<uint8_t> data1;
-			if (std::holds_alternative<std::string>(*arguments))
-			{
-				data = std::get<std::string>(*arguments);
-			}
-			// std::vector<uint8_t>
-
-			if (std::holds_alternative<std::vector<uint8_t>>(*arguments))
-			{
-				data1 = std::get<std::vector<uint8_t>>(*arguments);
-			}
-
-			string str = std::string(data1.data(), data1.data() + data1.size());
-			str = Utf8ToGbk(str.c_str());
-			std::cout << str << std::endl;
-			wstring ss = stringToWstring(str);
-			Gdiplus::Bitmap *image1 = Gdiplus::Bitmap::FromFile(ss.c_str());
-			Gdiplus::Bitmap &image = *image1;
-			HBITMAP hbitmap;
-			if (image1 == NULL)
-			{
-				std::cout << "NULL" << std::endl;
-				result->Success();
-				return;
-			}
-			image.GetHBITMAP(0, &hbitmap);
-			if (OpenClipboard(NULL))
-			{
-				EmptyClipboard();
-
-				DIBSECTION ds;
-				GetObject(hbitmap, sizeof(DIBSECTION), &ds);
-
-				// make sure compression is BI_RGB
-				ds.dsBmih.biCompression = BI_RGB;
-
-				// Convert DIB to DDB
-				HDC hdc = GetDC(NULL);
-				HBITMAP hbitmap_ddb = CreateDIBitmap(hdc, &ds.dsBmih, CBM_INIT,
-													 ds.dsBm.bmBits, (BITMAPINFO *)&ds.dsBmih, DIB_RGB_COLORS);
-				ReleaseDC(NULL, hdc);
-
-				SetClipboardData(CF_BITMAP, hbitmap_ddb);
-				CloseClipboard();
-				DeleteObject(hbitmap_ddb);
-			}
-
-			// copyBitmapToClipboard(data1, data1.size());
+			//		auto arguments = method_call.arguments();
+			//		//  getArgumentString(arguments,"");
+			//
+			//		std::cout << arguments << std::endl;
+			//		string data;
+			//		std::vector<uint8_t> data1;
+			//		if (std::holds_alternative<std::string>(*arguments))
+			//		{
+			//			data = std::get<std::string>(*arguments);
+			//		}
+			//		// std::vector<uint8_t>
+			//
+			//		if (std::holds_alternative<std::vector<uint8_t>>(*arguments))
+			//		{
+			//			data1 = std::get<std::vector<uint8_t>>(*arguments);
+			//		}
+			//
+			//		string str = std::string(data1.data(), data1.data() + data1.size());
+			//		str = Utf8ToGbk(str.c_str());
+			//		std::cout << str << std::endl;
+			//		wstring ss = stringToWstring(str);
+			//		Gdiplus::Bitmap *image1 = Gdiplus::Bitmap::FromFile(ss.c_str());
+			//		Gdiplus::Bitmap &image = *image1;
+			//		HBITMAP hbitmap;
+			//		if (image1 == NULL)
+			//		{
+			//			std::cout << "NULL" << std::endl;
+			//			result->Success();
+			//			return;
+			//		}
+			//		image.GetHBITMAP(0, &hbitmap);
+			//		if (OpenClipboard(NULL))
+			//		{
+			//			EmptyClipboard();
+			//
+			//			DIBSECTION ds;
+			//			GetObject(hbitmap, sizeof(DIBSECTION), &ds);
+			//
+			//			// make sure compression is BI_RGB
+			//			ds.dsBmih.biCompression = BI_RGB;
+			//
+			//			// Convert DIB to DDB
+			//			HDC hdc = GetDC(NULL);
+			//			HBITMAP hbitmap_ddb = CreateDIBitmap(hdc, &ds.dsBmih, CBM_INIT,
+			//												 ds.dsBm.bmBits, (BITMAPINFO *)&ds.dsBmih, DIB_RGB_COLORS);
+			//			ReleaseDC(NULL, hdc);
+			//
+			//			SetClipboardData(CF_BITMAP, hbitmap_ddb);
+			//			CloseClipboard();
+			//			DeleteObject(hbitmap_ddb);
+			//		}
+			//
+			//		// copyBitmapToClipboard(data1, data1.size());
 			result->Success();
 		}
 		else if (method_call.method_name() == "save2png")
@@ -759,5 +759,5 @@ void PasteboardPluginRegisterWithRegistrar(
 	PasteboardPlugin::RegisterWithRegistrar(
 		flutter::PluginRegistrarManager::GetInstance()
 			->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
-	GdiplusStartup(&m_GdiplusToken, &m_Gdistart, NULL);
+	//GdiplusStartup(&m_GdiplusToken, &m_Gdistart, NULL);
 }
