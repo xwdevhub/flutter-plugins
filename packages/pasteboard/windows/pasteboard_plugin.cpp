@@ -353,10 +353,9 @@ namespace
 		return hbitmap;
 	}
 
-	// 从剪贴板中获取图片保存在指定的未知
 	bool save2png(std::string filePath)
 	{
-		HDC hdc = CreateDCA("DISPLAY", NULL, NULL, NULL); // 为屏幕创建设备描述表
+		HDC hdc = CreateDCA("DISPLAY", NULL, NULL, NULL);
 		if (!OpenClipboard(nullptr))
 		{
 			std::cout << "cannot open clipboard" << std::endl;
