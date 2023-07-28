@@ -25,8 +25,8 @@ using namespace std;
 namespace
 {
 
-// 	GdiplusStartupInput m_Gdistart;
-// 	ULONG_PTR m_GdiplusToken;
+	// 	GdiplusStartupInput m_Gdistart;
+	// 	ULONG_PTR m_GdiplusToken;
 	using flutter::EncodableList;
 	using flutter::EncodableMap;
 	using flutter::EncodableValue;
@@ -361,7 +361,20 @@ namespace
 			std::cout << "cannot open clipboard" << std::endl;
 			return false;
 		}
+		int bitDepth = 24;
+		int bitWidth = 0;
+		int bitHeight = 0;
+		if (IsClipboardFormatAvailable(CF_DIB))
+		{
 
+			HANDLE hData = GetClipboardData(CF_DIB);
+			if (hData != NULL)
+			{
+				bitDepth = GetDIBBitDepth(hData);
+				bitWidth = GetDIBWidth(hData);
+				bitHeight = GetDIBHeight(hData);
+			}
+		}
 		HBITMAP hBitmap = nullptr;
 		if (IsClipboardFormatAvailable(CF_BITMAP))
 		{
@@ -369,9 +382,7 @@ namespace
 		}
 		if (hBitmap != nullptr)
 		{
-			BITMAP bm_info;
-			GetObject(hBitmap, sizeof(BITMAP), (LPSTR)&bm_info);
-			FIBITMAP *dib_new = FreeImage_Allocate(bm_info.bmWidth, bm_info.bmHeight, 24);
+			FIBITMAP *dib_new = FreeImage_Allocate(bitWidth, bitHeight, bitDepth);
 			GetDIBits(hdc, hBitmap, 0, FreeImage_GetHeight(dib_new),
 					  FreeImage_GetBits(dib_new), FreeImage_GetInfo(dib_new), DIB_RGB_COLORS);
 			int nColors = FreeImage_GetColorsUsed(dib_new);
@@ -758,5 +769,5 @@ void PasteboardPluginRegisterWithRegistrar(
 	PasteboardPlugin::RegisterWithRegistrar(
 		flutter::PluginRegistrarManager::GetInstance()
 			->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
-	//GdiplusStartup(&m_GdiplusToken, &m_Gdistart, NULL);
+	// GdiplusStartup(&m_GdiplusToken, &m_Gdistart, NULL);
 }
