@@ -353,6 +353,42 @@ namespace
 		return hbitmap;
 	}
 
+	int GetDIBBitDepth(HANDLE hData)
+	{
+		BITMAPINFO *bmi = (BITMAPINFO *)GlobalLock(hData);
+		if (bmi != NULL)
+		{
+			int bitDepth = bmi->bmiHeader.biBitCount;
+			GlobalUnlock(hData);
+			return bitDepth;
+		}
+		return 0; // Failed to get bit depth
+	}
+
+	int GetDIBWidth(HANDLE hData)
+	{
+		BITMAPINFO *bmi = (BITMAPINFO *)GlobalLock(hData);
+		if (bmi != NULL)
+		{
+			int width = bmi->bmiHeader.biWidth;
+			GlobalUnlock(hData);
+			return width;
+		}
+		return 0; // Failed to get width
+	}
+
+	int GetDIBHeight(HANDLE hData)
+	{
+		BITMAPINFO *bmi = (BITMAPINFO *)GlobalLock(hData);
+		if (bmi != NULL)
+		{
+			int height = abs(bmi->bmiHeader.biHeight); // Make sure it's positive (DIB is upside-down)
+			GlobalUnlock(hData);
+			return height;
+		}
+		return 0; // Failed to get height
+	}
+
 	bool save2png(std::string filePath)
 	{
 		HDC hdc = CreateDCA("DISPLAY", NULL, NULL, NULL);
