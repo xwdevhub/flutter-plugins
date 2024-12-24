@@ -2,7 +2,6 @@
 
 import 'dart:html';
 import 'dart:js_util';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -123,6 +122,18 @@ class PasteboardPlatformWeb implements PasteboardPlatform {
     _select(fakeElement);
     _copyCommand();
     fakeElement.remove();
+  }
+
+  @override
+  Future<bool> save2png(String path) {
+    // TODO: implement save2png
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> writeHtml(String html) {
+    // TODO: implement writeHtml
+    throw UnimplementedError();
   }
 }
 

@@ -11,6 +11,8 @@ abstract class PasteboardPlatform {
 
   Future<bool> writeFiles(List<String> files);
 
+  Future<void> writeHtml(String html);
+
   Future<String?> get text;
 
   void writeText(String value);

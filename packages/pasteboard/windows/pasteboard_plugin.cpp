@@ -18,7 +18,7 @@
 // #include <GdiPlus.h>
 #include "include/FreeImage.h"
 // #pragma comment(lib, "gdiplus.lib")
-
+#include <iomanip>
 // using namespace Gdiplus;
 using namespace std;
 
@@ -591,7 +591,123 @@ namespace {
             }
             CloseClipboard();
             result->Success(flutter::EncodableValue(file_list));
-        } else if (method_call.method_name() == "writeFiles") {
+        } else if(method_call.method_name() == "writeHtml"){
+            auto arguments = method_call.arguments();
+            if (!arguments || !std::holds_alternative<std::string>(*arguments)) {
+                result->Error("0", "Invalid argument: expected a string");
+                return;
+            }
+
+
+            std::string html_content = std::get<std::string>(*arguments) ;
+
+
+            // Get clipboard id for HTML format...
+            static UINT cfid = 0;
+            if (!cfid) {
+                cfid = RegisterClipboardFormatA("HTML Format");
+                if (cfid == 0) {
+                    result->Error("1", "Failed to register clipboard format");
+                    return;
+                }
+            }
+            // Create the HTML header and footer as wide strings
+            std::string headerHtml =
+                    "Version:0.9\r\n"
+                    "StartHTML:00000000\r\n"
+                    "EndHTML:00000000\r\n"
+                    "StartFragment:00000000\r\n"
+                    "EndFragment:00000000\r\n";
+            std::string header =
+                    "Version:0.9\r\n"
+                    "StartHTML:00000000\r\n"
+                    "EndHTML:00000000\r\n"
+                    "StartFragment:00000000\r\n"
+                    "EndFragment:00000000\r\n"
+                    "<html><body>\r\n"
+                    "<!--StartFragment -->\r\n";
+
+            std::string footer =
+                    "<!--EndFragment-->\r\n"
+                    "</body>\r\n"
+                    "</html>";
+
+            // Convert the HTML content to a wide string
+//            std::wstring html_wide = std::wstring(html_content.begin(), html_content.end());
+
+            // Calculate the total length of the final string
+            size_t total_length = header.size() + html_content.size() + footer.size();
+
+            // Allocate a buffer for the final string
+            std::string final_html(total_length, ' ');
+
+            // Build the final HTML string
+            sprintf_s(&final_html[0], total_length + 1,
+                       "Version:0.9\r\n"
+                       "StartHTML:%08llu\r\n"
+                       "EndHTML:%08llu\r\n"
+                       "StartFragment:%08llu\r\n"
+                       "EndFragment:%08llu\r\n"
+                       "<html><body>\r\n"
+                       "<!--StartFragment -->\r\n"
+                       "%s"
+                       "<!--EndFragment-->\r\n"
+                       "</body>\r\n"
+                       "</html>",
+                       headerHtml.size(),
+                       header.size() + html_content.size() + footer.size(),
+                       header.size() ,
+                       header.size() + html_content.size(),
+                       html_content.c_str());
+
+
+            // Open the clipboard...
+            if (!OpenClipboard(NULL)) {
+                result->Error("2", "Failed to open clipboard");
+                return;
+            }
+
+            // Empty what's in there...
+            if (!EmptyClipboard()) {
+                result->Error("3", "Failed to empty clipboard");
+                CloseClipboard();
+                return;
+            }
+
+            // Allocate global memory for transfer...
+            HGLOBAL hText = GlobalAlloc(GMEM_MOVEABLE, (final_html.size() + 1) * sizeof(char));
+            if (!hText) {
+                result->Error("4", "Failed to allocate global memory");
+                CloseClipboard();
+                return;
+            }
+
+            // Put your string in the global memory...
+            char* ptr = (char *)GlobalLock(hText);
+            if (ptr) {
+
+                strcpy_s(ptr, final_html.size() + 1, final_html.c_str());
+
+                GlobalUnlock(hText);
+
+
+
+                // Set the clipboard data
+                if (!SetClipboardData(cfid, hText)) {
+                    result->Error("5", "Failed to set clipboard data");
+                    GlobalFree(hText);  // Only free if SetClipboardData fails
+                } else {
+                    // Success! The system now owns the memory.
+                    result->Success();
+                }
+            } else {
+                result->Error("6", "Failed to lock global memory");
+                GlobalFree(hText);
+            }
+
+            // Close the clipboard...
+            CloseClipboard();
+        }else if (method_call.method_name() == "writeFiles") {
             auto *arguments = method_call.arguments();
             auto files = std::get_if < std::vector < flutter::EncodableValue >> (arguments);
             if (!files) {

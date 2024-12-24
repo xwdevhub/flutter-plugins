@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -63,6 +62,18 @@ class PasteboardPlatformIO implements PasteboardPlatform {
     }
     if (Platform.isIOS || Platform.isMacOS || Platform.isWindows) {
       await _channel.invokeMethod<void>('writeImage', image);
+    }
+  }
+
+  @override
+  Future<void> writeHtml(String? html) async {
+    if (html == null) {
+      return;
+    }
+    if (Platform.isWindows) {
+      try {
+        await _channel.invokeMethod<void>('writeHtml', html);
+      } catch (e) {}
     }
   }
 

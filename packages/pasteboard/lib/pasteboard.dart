@@ -41,4 +41,6 @@ class Pasteboard {
   static void writeText(String value) => pasteboard.writeText(value);
 
   static Future<bool> save2png(String value) => pasteboard.save2png(value);
+
+  static Future<void> writeHtml(String value) => pasteboard.writeHtml(value);
 }
